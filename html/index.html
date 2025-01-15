@@ -5,27 +5,29 @@
     <meta http-equiv="X-UA-Compatible" content="IE-edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Accueil - Cinéma</title>
-    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="../css/index.css" />
   </head>
   <body>
     <header>
       <div class="logo">
-        <a href="index.html">Movies</a>
+        <a href="index.html">Cinémax</a>
       </div>
       <nav class="menu">
-        <a href="index.html" class="Accueil">Accueil</a>
         <a href="search.html">Rechercher</a>
       </nav>
     </header>
     <section class="Titre">
-      <span>Bienvenue</span>
-      <br />
       <h1>Découvrez les films tendances</h1>
     </section>
+    <div class="illustration">
+      <img src="../image/Cinéma.jpg" alt="Cinéma" />
+    </div>
     <main>
-      <section id="trending-movies"></section>
-      <button id="load-more">Charger plus</button>
+      <section id="trending-movies" class="cartes">
+        <!-- Les cartes des films seront insérées dynamiquement ici -->
+      </section>
+      <button id="load-more">Charger plus de résultats</button>
     </main>
-    <script src="js/index.js"></script>
+    <script src="../js/index.js"></script>
   </body>
 </html>
