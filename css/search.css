@@ -38,7 +38,7 @@ header::before {
 
 .logo a {
   font-size: 2rem;
-  color: #fff;
+  color: #ffcf39;
   text-decoration: none;
   font-weight: 700;
 }
@@ -79,8 +79,9 @@ header::before {
   top: 35%;
   left: 50%;
   transform: translate(-50%, -50%);
+  text-align: center;
   max-width: 650px;
-  width: 100%;
+  width: 90%;
   z-index: 2;
 }
 
@@ -188,8 +189,42 @@ header::before {
   background-color: black;
 }
 
-@media (max-width: 768px) {
-  .Titre h1 {
-    font-size: 2.5em;
+@media (max-width: 800px) and (min-width: 501px) {
+  #search-form {
+    width: 500px; /* Réduit la largeur à 80% de l'écran */
+    max-width: 360px; /* Empêche de dépasser la largeur de la page */
+  }
+
+  .search {
+    padding: 12px; /* Réduit légèrement les marges internes */
+  }
+
+  .search-input {
+    font-size: 14px; /* Réduit légèrement la taille du texte */
+    width: 300px; /* Prend tout l'espace disponible */
+  }
+
+  .search-icon {
+    font-size: 18px; /* Diminue la taille de l'icône */
+  }
+}
+
+@media (max-width: 500px) {
+  #search-form {
+    width: 500px; /* Réduit la largeur à 80% de l'écran */
+    max-width: 230px; /* Empêche de dépasser la largeur de la page */
+  }
+
+  .search {
+    padding: 12px; /* Réduit légèrement les marges internes */
+  }
+
+  .search-input {
+    font-size: 14px; /* Réduit légèrement la taille du texte */
+    width: 100%; /* Prend tout l'espace disponible */
+  }
+
+  .search-icon {
+    font-size: 18px; /* Diminue la taille de l'icône */
   }
 }
