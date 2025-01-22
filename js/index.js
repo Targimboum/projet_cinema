@@ -1,7 +1,6 @@
-// index.js: Dynamically load trending movies and load more on button click.
-
-const apiEndpoint = "https://api.themoviedb.org/3";
-const apiKey = "https://www.omdbapi.com/?apikey=${apiKey}&s="; // Remplacez par votre clé d'API
+// API configuration
+const apiEndpoint = "https://www.omdbapi.com";
+const apiKey = "d9d9e11f"; // Your valid OMDb API key
 
 let currentPage = 1;
 

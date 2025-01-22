@@ -1,7 +1,6 @@
-// search.js: Handle movie search functionality with dynamic results.
-
-const apiEndpoint = "https://api.themoviedb.org/3";
-const apiKey = "https://www.omdbapi.com/?apikey=${apiKey}&s="; // Remplacez par votre clé d'API
+// API configuration
+const apiEndpoint = "https://www.omdbapi.com";
+const apiKey = "d9d9e11f"; // Your valid OMDb API key
 
 let searchQuery = "";
 let currentPage = 1;
