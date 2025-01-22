@@ -1,54 +1,75 @@
-// movie.js: Display detailed information about a selected movie.
-
 // API configuration
 const apiEndpoint = "https://www.omdbapi.com";
 const apiKey = "d9d9e11f"; // Your valid OMDb API key
-// Function to fetch movie details
+
+// Function to fetch movie details by ID
 async function fetchMovieDetails(movieId) {
-  const response = await fetch(
-    `${apiEndpoint}/movie/${movieId}?api_key=${apiKey}`
-  );
-  if (!response.ok) throw new Error("Failed to fetch movie details");
-  const data = await response.json();
-  return data;
+  try {
+    const response = await fetch(
+      `${apiEndpoint}/?apikey=${apiKey}&i=${movieId}`
+    );
+    const movie = await response.json();
+
+    if (movie.Response === "True") {
+      return movie; // Return movie details
+    } else {
+      console.error("Error fetching movie details:", movie.Error);
+      return null;
+    }
+  } catch (error) {
+    console.error("Network error:", error);
+    return null;
+  }
 }
 
-// Function to render movie details on the page
+// Function to render movie details in the HTML
 function renderMovieDetails(movie) {
-  const container = document.querySelector("#movie-details-container");
+  // Update the movie title
+  document.querySelector(".Titre h1").textContent = movie.Title;
 
-  container.innerHTML = `
-      <div class="movie-detail-card">
-          <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${
-    movie.title
-  }" />
-          <div class="movie-detail-info">
-              <h2>${movie.title}</h2>
-              <p><strong>Release Date:</strong> ${movie.release_date}</p>
-              <p><strong>Rating:</strong> ${movie.vote_average}/10</p>
-              <p><strong>Overview:</strong> ${movie.overview}</p>
-              <p><strong>Genres:</strong> ${movie.genres
-                .map((genre) => genre.name)
-                .join(", ")}</p>
-          </div>
-      </div>
+  // Update the movie poster
+  const imgElement = document.querySelector(".illustration img");
+  imgElement.src = movie.Poster !== "N/A" ? movie.Poster : "placeholder.jpg";
+  imgElement.alt = movie.Title;
+
+  // Add movie details
+  const content = document.querySelector(".film-content");
+  content.innerHTML = `
+    <h4>Genre</h4>
+    <p>${movie.Genre}</p>
+
+    <h4>Ratings</h4>
+    <p>${movie.imdbRating} / 10</p>
+
+    <h4>Release Date</h4>
+    <p>${movie.Released}</p>
+
+    <div class="ligne-de-separation"></div>
+
+    <h3>Plot</h3>
+    <p>${movie.Plot}</p>
+
+    <div class="ligne-de-separation"></div>
+
+    <h4>Actors</h4>
+    <p>${movie.Actors}</p>
   `;
 }
 
-// Initialize movie details on page load
+// Load movie details when the page loads
 document.addEventListener("DOMContentLoaded", async () => {
+  // Get the movie ID from the URL
   const urlParams = new URLSearchParams(window.location.search);
   const movieId = urlParams.get("id");
 
   if (!movieId) {
-    console.error("No movie ID provided in the URL");
+    console.error("No movie ID provided in the URL.");
     return;
   }
 
-  try {
-    const movie = await fetchMovieDetails(movieId);
+  // Fetch and render the movie details
+  const movie = await fetchMovieDetails(movieId);
+  if (movie) {
     renderMovieDetails(movie);
-  } catch (error) {
-    console.error(error);
   }
 });

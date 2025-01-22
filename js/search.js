@@ -2,92 +2,89 @@
 const apiEndpoint = "https://www.omdbapi.com";
 const apiKey = "d9d9e11f"; // Your valid OMDb API key
 
+// Search state
 let searchQuery = "";
 let currentPage = 1;
 
-// Function to fetch search results
+// Function to fetch search results by query
 async function fetchSearchResults(query, page = 1) {
-  const response = await fetch(
-    `${apiEndpoint}/search/movie?api_key=${apiKey}&query=${encodeURIComponent(
-      query
-    )}&page=${page}`
-  );
-  if (!response.ok) throw new Error("Failed to fetch search results");
-  const data = await response.json();
-  return data.results;
+  try {
+    const response = await fetch(
+      `${apiEndpoint}/?apikey=${apiKey}&s=${encodeURIComponent(
+        query
+      )}&page=${page}`
+    );
+    const data = await response.json();
+
+    if (data.Response === "True") {
+      return data.Search; // Return the search results
+    } else {
+      console.error("Error fetching search results:", data.Error);
+      return [];
+    }
+  } catch (error) {
+    console.error("Network error:", error);
+    return [];
+  }
 }
 
-// Function to create movie card
+// Function to create an HTML movie card
 function createMovieCard(movie) {
   const card = document.createElement("div");
-  card.classList.add("movie-card");
+  card.classList.add("carte");
 
+  // Add the movie details to the card
   card.innerHTML = `
-        <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${
-    movie.title
-  }" />
-        <div class="movie-info">
-            <h3>${movie.title}</h3>
-            <p>${movie.overview.slice(0, 100)}...</p>
-            <button onclick="viewMovieDetails(${
-              movie.id
-            })">View Details</button>
-        </div>
-    `;
+    <img src="${
+      movie.Poster !== "N/A" ? movie.Poster : "placeholder.jpg"
+    }" alt="${movie.Title}" />
+    <div class="contenu">
+      <h3>${movie.Title}</h3>
+      <p>${movie.Year}</p>
+      <a href="movie.html?id=${movie.imdbID}" class="btn">More Info</a>
+    </div>
+  `;
 
-  return card;
+  return card; // Return the created card
 }
 
-// Function to render movies on the page
+// Function to render movies inside the HTML container
 function renderMovies(movies) {
-  const container = document.querySelector("#search-results-container");
+  const container = document.querySelector("#search-results");
+
+  // Append each movie card to the container
   movies.forEach((movie) => {
     const card = createMovieCard(movie);
     container.appendChild(card);
   });
 }
 
-// Function to view movie details
-function viewMovieDetails(movieId) {
-  window.location.href = `movie.html?id=${movieId}`;
-}
-
-// Function to handle search form submission
+// Function to handle the search form submission
 async function handleSearch(event) {
-  event.preventDefault();
+  event.preventDefault(); // Prevent page reload
   const queryInput = document.querySelector("#search-input");
-  searchQuery = queryInput.value;
+  searchQuery = queryInput.value.trim();
   currentPage = 1;
 
-  try {
-    const resultsContainer = document.querySelector(
-      "#search-results-container"
-    );
-    resultsContainer.innerHTML = ""; // Clear previous results
+  const container = document.querySelector("#search-results");
+  container.innerHTML = ""; // Clear previous results
 
-    const movies = await fetchSearchResults(searchQuery);
-    renderMovies(movies);
-  } catch (error) {
-    console.error(error);
-  }
+  const movies = await fetchSearchResults(searchQuery); // Fetch search results
+  renderMovies(movies); // Render the results
 }
 
-// Function to handle load more button
+// Function to load more search results
 async function loadMoreResults() {
-  currentPage++;
-  try {
-    const movies = await fetchSearchResults(searchQuery, currentPage);
-    renderMovies(movies);
-  } catch (error) {
-    console.error(error);
-  }
+  currentPage++; // Move to the next page
+  const movies = await fetchSearchResults(searchQuery, currentPage); // Fetch next page of results
+  renderMovies(movies); // Render the new results
 }
 
-// Initialize search functionality on page load
+// Initialize event listeners when the page loads
 document.addEventListener("DOMContentLoaded", () => {
   const searchForm = document.querySelector("#search-form");
-  searchForm.addEventListener("submit", handleSearch);
+  searchForm.addEventListener("submit", handleSearch); // Handle form submission
 
-  const loadMoreButton = document.querySelector("#load-more-button");
-  loadMoreButton.addEventListener("click", loadMoreResults);
+  const loadMoreButton = document.querySelector("#load-more");
+  loadMoreButton.addEventListener("click", loadMoreResults); // Handle "Load More" button click
 });
