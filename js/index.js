@@ -26,10 +26,27 @@ async function fetchTrendingMovies(page = 1) {
   }
 }
 
+// Function to fetch additional movie details by ID to get the plot
+async function fetchMovieDetailsById(movieId) {
+  try {
+    const response = await fetch(
+      `${apiEndpoint}/?apikey=${apiKey}&i=${movieId}&plot=short`
+    );
+    const data = await response.json();
+    return data.Response === "True" ? data : null;
+  } catch (error) {
+    console.error("Error fetching movie details:", error);
+    return null;
+  }
+}
+
 // Function to create an HTML movie card
-function createMovieCard(movie) {
+async function createMovieCard(movie) {
   const card = document.createElement("div");
   card.classList.add("carte");
+
+  // Fetch additional details (like plot) for the movie
+  const movieDetails = await fetchMovieDetailsById(movie.imdbID);
 
   // Add the movie details to the card
   card.innerHTML = `
@@ -38,30 +55,30 @@ function createMovieCard(movie) {
     }" alt="${movie.Title}" />
     <div class="contenu">
       <h3>${movie.Title}</h3>
-      <p>${movie.Year}</p>
-      <a href="movie.html?id=${movie.imdbID}" class="btn">More Info</a>
+      <p>${movieDetails?.Plot || "Plot not available."}</p>
+      <a href="movie.html?id=${movie.imdbID}" class="btn">En savoir plus</a>
     </div>
   `;
 
   return card; // Return the created card
 }
 
-// Function to render movies inside the HTML container
-function renderMovies(movies) {
+// Function to render movies inside the HTML container (Append mode)
+async function renderMovies(movies) {
   const container = document.querySelector("#trending-movies");
 
-  // Append each movie card to the container
-  movies.forEach((movie) => {
-    const card = createMovieCard(movie);
+  // Append each movie card to the container without clearing it
+  for (const movie of movies) {
+    const card = await createMovieCard(movie);
     container.appendChild(card);
-  });
+  }
 }
 
 // Function to load more movies when the button is clicked
 async function loadMoreMovies() {
   currentPage++; // Move to the next page
   const movies = await fetchTrendingMovies(currentPage); // Fetch new movies
-  renderMovies(movies); // Render the new movies
+  renderMovies(movies); // Append the new movies
 }
 
 // Load trending movies when the page loads

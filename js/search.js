@@ -28,10 +28,27 @@ async function fetchSearchResults(query, page = 1) {
   }
 }
 
+// Function to fetch additional movie details by ID to get the plot
+async function fetchMovieDetailsById(movieId) {
+  try {
+    const response = await fetch(
+      `${apiEndpoint}/?apikey=${apiKey}&i=${movieId}&plot=short`
+    );
+    const data = await response.json();
+    return data.Response === "True" ? data : null;
+  } catch (error) {
+    console.error("Error fetching movie details:", error);
+    return null;
+  }
+}
+
 // Function to create an HTML movie card
-function createMovieCard(movie) {
+async function createMovieCard(movie) {
   const card = document.createElement("div");
   card.classList.add("carte");
+
+  // Fetch additional details (like plot) for the movie
+  const movieDetails = await fetchMovieDetailsById(movie.imdbID);
 
   // Add the movie details to the card
   card.innerHTML = `
@@ -40,7 +57,7 @@ function createMovieCard(movie) {
     }" alt="${movie.Title}" />
     <div class="contenu">
       <h3>${movie.Title}</h3>
-      <p>${movie.Year}</p>
+      <p>${movieDetails?.Plot || "Plot not available."}</p>
       <a href="movie.html?id=${movie.imdbID}" class="btn">More Info</a>
     </div>
   `;
@@ -49,14 +66,15 @@ function createMovieCard(movie) {
 }
 
 // Function to render movies inside the HTML container
-function renderMovies(movies) {
+async function renderMovies(movies) {
   const container = document.querySelector("#search-results");
+  container.innerHTML = ""; // Clear the container before rendering
 
   // Append each movie card to the container
-  movies.forEach((movie) => {
-    const card = createMovieCard(movie);
+  for (const movie of movies) {
+    const card = await createMovieCard(movie);
     container.appendChild(card);
-  });
+  }
 }
 
 // Function to handle the search form submission
@@ -65,9 +83,6 @@ async function handleSearch(event) {
   const queryInput = document.querySelector("#search-input");
   searchQuery = queryInput.value.trim();
   currentPage = 1;
-
-  const container = document.querySelector("#search-results");
-  container.innerHTML = ""; // Clear previous results
 
   const movies = await fetchSearchResults(searchQuery); // Fetch search results
   renderMovies(movies); // Render the results
@@ -83,8 +98,12 @@ async function loadMoreResults() {
 // Initialize event listeners when the page loads
 document.addEventListener("DOMContentLoaded", () => {
   const searchForm = document.querySelector("#search-form");
-  searchForm.addEventListener("submit", handleSearch); // Handle form submission
+  if (searchForm) {
+    searchForm.addEventListener("submit", handleSearch); // Handle form submission
+  }
 
   const loadMoreButton = document.querySelector("#load-more");
-  loadMoreButton.addEventListener("click", loadMoreResults); // Handle "Load More" button click
+  if (loadMoreButton) {
+    loadMoreButton.addEventListener("click", loadMoreResults); // Handle "Load More" button click
+  }
 });

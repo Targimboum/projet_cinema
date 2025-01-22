@@ -6,7 +6,7 @@ const apiKey = "d9d9e11f"; // Your valid OMDb API key
 async function fetchMovieDetails(movieId) {
   try {
     const response = await fetch(
-      `${apiEndpoint}/?apikey=${apiKey}&i=${movieId}`
+      `${apiEndpoint}/?apikey=${apiKey}&i=${movieId}&plot=full`
     );
     const movie = await response.json();
 
@@ -58,7 +58,6 @@ function renderMovieDetails(movie) {
 
 // Load movie details when the page loads
 document.addEventListener("DOMContentLoaded", async () => {
-  // Get the movie ID from the URL
   const urlParams = new URLSearchParams(window.location.search);
   const movieId = urlParams.get("id");
 
@@ -67,9 +66,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  // Fetch and render the movie details
-  const movie = await fetchMovieDetails(movieId);
+  const movie = await fetchMovieDetails(movieId); // Fetch movie details
   if (movie) {
-    renderMovieDetails(movie);
+    renderMovieDetails(movie); // Render the details
   }
 });
