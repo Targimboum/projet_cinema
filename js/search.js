@@ -1,109 +1,116 @@
 // API configuration
 const apiEndpoint = "https://www.omdbapi.com";
-const apiKey = "d9d9e11f"; // Your valid OMDb API key
+const apiKey = "d9d9e11f"; // Votre clé API valide
 
-// Search state
-let searchQuery = "";
+// Variables pour la recherche et la pagination
 let currentPage = 1;
+let currentQuery = "";
 
-// Function to fetch search results by query
-async function fetchSearchResults(query, page = 1) {
+// Sélection des éléments HTML
+const searchInput = document.querySelector(".search-input");
+const searchResultsContainer = document.querySelector("#search-results");
+const loadMoreButton = document.querySelector("#load-more");
+
+// Vérifie si les éléments HTML sont bien trouvés
+if (!searchInput || !searchResultsContainer || !loadMoreButton) {
+  console.error("Un ou plusieurs éléments HTML requis sont introuvables !");
+}
+
+// Fonction pour récupérer les films via l'API OMDb
+async function fetchMovies(query, page = 1) {
   try {
+    // Construire l'URL de la requête
     const response = await fetch(
       `${apiEndpoint}/?apikey=${apiKey}&s=${encodeURIComponent(
         query
       )}&page=${page}`
     );
+
     const data = await response.json();
 
     if (data.Response === "True") {
-      return data.Search; // Return the search results
+      console.log("Films trouvés :", data.Search); // Debugging : Afficher les résultats dans la console
+      return data.Search; // Retourne la liste des films
     } else {
-      console.error("Error fetching search results:", data.Error);
+      console.warn("Aucun film trouvé :", data.Error);
       return [];
     }
   } catch (error) {
-    console.error("Network error:", error);
+    console.error("Erreur réseau :", error);
     return [];
   }
 }
 
-// Function to fetch additional movie details by ID to get the plot
-async function fetchMovieDetailsById(movieId) {
-  try {
-    const response = await fetch(
-      `${apiEndpoint}/?apikey=${apiKey}&i=${movieId}&plot=short`
-    );
-    const data = await response.json();
-    return data.Response === "True" ? data : null;
-  } catch (error) {
-    console.error("Error fetching movie details:", error);
-    return null;
+// Fonction pour afficher les films dans le conteneur HTML
+function displayMovies(movies, append = false) {
+  if (!append) {
+    searchResultsContainer.innerHTML = ""; // Efface les anciens résultats
   }
-}
 
-// Function to create an HTML movie card
-async function createMovieCard(movie) {
-  const card = document.createElement("div");
-  card.classList.add("carte");
-
-  // Fetch additional details (like plot) for the movie
-  const movieDetails = await fetchMovieDetailsById(movie.imdbID);
-
-  // Add the movie details to the card
-  card.innerHTML = `
-    <img src="${
-      movie.Poster !== "N/A" ? movie.Poster : "placeholder.jpg"
-    }" alt="${movie.Title}" />
-    <div class="contenu">
-      <h3>${movie.Title}</h3>
-      <p>${movieDetails?.Plot || "Plot not available."}</p>
-      <a href="movie.html?id=${movie.imdbID}" class="btn">More Info</a>
-    </div>
-  `;
-
-  return card; // Return the created card
-}
-
-// Function to render movies inside the HTML container
-async function renderMovies(movies) {
-  const container = document.querySelector("#search-results");
-  container.innerHTML = ""; // Clear the container before rendering
-
-  // Append each movie card to the container
-  for (const movie of movies) {
-    const card = await createMovieCard(movie);
-    container.appendChild(card);
+  if (movies.length === 0) {
+    searchResultsContainer.innerHTML = "<p>Aucun film trouvé.</p>";
+    return;
   }
+
+  movies.forEach((movie) => {
+    const card = document.createElement("div");
+    card.classList.add("carte");
+
+    // Contenu de la carte avec les informations du film
+    card.innerHTML = `
+      <img src="${
+        movie.Poster !== "N/A" ? movie.Poster : "placeholder.jpg"
+      }" alt="${movie.Title}" />
+      <div class="contenu">
+        <h3>${movie.Title}</h3>
+        <p>${movie.Year}</p>
+        <a href="movie.html?id=${movie.imdbID}" class="btn">En savoir plus</a>
+      </div>
+    `;
+
+    searchResultsContainer.appendChild(card);
+  });
 }
 
-// Function to handle the search form submission
+// Fonction pour gérer la recherche en temps réel
 async function handleSearch(event) {
-  event.preventDefault(); // Prevent page reload
-  const queryInput = document.querySelector("#search-input");
-  searchQuery = queryInput.value.trim();
-  currentPage = 1;
+  currentQuery = searchInput.value.trim(); // Récupérer la valeur saisie
+  currentPage = 1; // Réinitialiser la pagination
 
-  const movies = await fetchSearchResults(searchQuery); // Fetch search results
-  renderMovies(movies); // Render the results
-}
-
-// Function to load more search results
-async function loadMoreResults() {
-  currentPage++; // Move to the next page
-  const movies = await fetchSearchResults(searchQuery, currentPage); // Fetch next page of results
-  renderMovies(movies); // Render the new results
-}
-
-// Initialize event listeners when the page loads
-document.addEventListener("DOMContentLoaded", () => {
-  const searchForm = document.querySelector("#search-form");
-  if (searchForm) {
-    searchForm.addEventListener("submit", handleSearch); // Handle form submission
+  if (currentQuery === "") {
+    searchResultsContainer.innerHTML = "<p>Veuillez entrer un mot-clé.</p>";
+    return;
   }
 
-  const loadMoreButton = document.querySelector("#load-more");
+  console.log("Recherche en cours pour :", currentQuery); // Debugging
+
+  const movies = await fetchMovies(currentQuery, currentPage); // Récupère les résultats de recherche
+  displayMovies(movies); // Affiche les films
+}
+
+// Fonction pour charger plus de résultats
+async function loadMoreResults() {
+  if (currentQuery === "") return; // Ne rien faire si aucune recherche en cours
+
+  currentPage++; // Incrémenter la page
+  console.log("Chargement de la page :", currentPage); // Debugging
+
+  const movies = await fetchMovies(currentQuery, currentPage); // Récupérer les résultats de la page suivante
+  displayMovies(movies, true); // Ajouter les nouveaux résultats à la suite
+}
+
+// Initialisation des écouteurs d'événements
+document.addEventListener("DOMContentLoaded", () => {
+  // Vérifie si les éléments sont trouvés avant d'ajouter des écouteurs
+  if (searchInput) {
+    searchInput.addEventListener("input", handleSearch);
+  } else {
+    console.error("Barre de recherche introuvable !");
+  }
+
   if (loadMoreButton) {
-    loadMoreButton.addEventListener("click", loadMoreResults); // Handle "Load More" button click
+    loadMoreButton.addEventListener("click", loadMoreResults);
+  } else {
+    console.error("Bouton 'Charger plus' introuvable !");
   }
 });

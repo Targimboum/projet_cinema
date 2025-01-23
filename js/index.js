@@ -10,7 +10,7 @@ async function fetchTrendingMovies(page = 1) {
   try {
     // Construct the URL to fetch trending movies with a keyword (e.g., "avengers")
     const response = await fetch(
-      `${apiEndpoint}/?apikey=${apiKey}&s=avengers&page=${page}`
+      `${apiEndpoint}/?apikey=${apiKey}&t=${name}&page=${page}`
     );
     const data = await response.json();
 
