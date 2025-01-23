@@ -56,7 +56,7 @@ async function createMovieCard(movie) {
     <div class="contenu">
       <h3>${movie.Title}</h3>
       <p>${movieDetails?.Plot || "Plot not available."}</p>
-      <a href="movie.html?id=${movie.imdbID}" class="btn">En savoir plus</a>
+      <a href="movie.html?id=${movie.imdbID}" class="btn">More info</a>
     </div>
   `;
 
