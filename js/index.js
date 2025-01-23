@@ -5,12 +5,12 @@ const apiKey = "d9d9e11f"; // Your valid OMDb API key
 // Keep track of the current page for pagination
 let currentPage = 1;
 
-// Function to fetch trending movies from the OMDb API
+// Function to fetch movies from the OMDb API (only for 2024)
 async function fetchTrendingMovies(page = 1) {
   try {
-    // Construct the URL to fetch trending movies with a keyword (e.g., "avengers")
+    // Construct the URL to fetch movies with the year 2024
     const response = await fetch(
-      `${apiEndpoint}/?apikey=${apiKey}&t=${name}&page=${page}`
+      `${apiEndpoint}/?apikey=${apiKey}&s=movie&y=2024&page=${page}`
     );
     const data = await response.json();
 
@@ -40,6 +40,14 @@ async function fetchMovieDetailsById(movieId) {
   }
 }
 
+// Function to truncate the plot to a specified length
+function truncatePlot(plot, maxLength = 150) {
+  if (plot && plot.length > maxLength) {
+    return plot.substring(0, maxLength) + "..."; // Truncate and add ellipsis
+  }
+  return plot; // Return the plot as is if it's already short enough
+}
+
 // Function to create an HTML movie card
 async function createMovieCard(movie) {
   const card = document.createElement("div");
@@ -48,6 +56,11 @@ async function createMovieCard(movie) {
   // Fetch additional details (like plot) for the movie
   const movieDetails = await fetchMovieDetailsById(movie.imdbID);
 
+  // Truncate the plot for brevity
+  const truncatedPlot = movieDetails
+    ? truncatePlot(movieDetails.Plot)
+    : "Plot not available.";
+
   // Add the movie details to the card
   card.innerHTML = `
     <img src="${
@@ -55,8 +68,8 @@ async function createMovieCard(movie) {
     }" alt="${movie.Title}" />
     <div class="contenu">
       <h3>${movie.Title}</h3>
-      <p>${movieDetails?.Plot || "Plot not available."}</p>
-      <a href="movie.html?id=${movie.imdbID}" class="btn">More info</a>
+      <p>${truncatedPlot}</p>
+      <a href="movie.html?id=${movie.imdbID}" class="btn">En savoir plus</a>
     </div>
   `;
 
@@ -83,7 +96,7 @@ async function loadMoreMovies() {
 
 // Load trending movies when the page loads
 document.addEventListener("DOMContentLoaded", async () => {
-  const movies = await fetchTrendingMovies(); // Fetch the first page of movies
+  const movies = await fetchTrendingMovies(); // Fetch the first page of movies for 2024
   renderMovies(movies); // Render the fetched movies
 
   // Add an event listener to the "Load More" button
