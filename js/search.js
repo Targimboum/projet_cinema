@@ -7,7 +7,7 @@ const loadMoreButton = document.getElementById("load-more");
 let searchQuery = "";
 let currentPage = 1;
 const resultsPerPage = 10;
-const apiKey = "d9d9e11f"; // Remplace par ta vraie clé API OMDb
+const apiKey = "d9d9e11f";
 
 // Fonction pour effectuer la recherche
 const fetchSearchResults = async () => {
@@ -47,7 +47,9 @@ const fetchSearchResults = async () => {
           }" alt="${movie.Title}">
           <div class="contenu">
             <h3>${movie.Title}</h3>
-            <p>${movie.Year}</p>
+            <p>${
+              movie.Year
+            }</p>  <!-- Remplacement du plot par l'année de sortie -->
             <a href="movie.html?i=${
               movie.imdbID
             }" class="btn">En savoir plus</a>
@@ -56,13 +58,10 @@ const fetchSearchResults = async () => {
 
         resultsContainer.appendChild(movieCard);
       });
-    } else {
-      resultsContainer.innerHTML = "<p>Aucun résultat trouvé.</p>";
     }
   } catch (error) {
     console.error("Erreur lors de la récupération des résultats:", error);
-    resultsContainer.innerHTML =
-      "<p>Une erreur est survenue. Veuillez réessayer.</p>";
+    // Aucun message d'erreur visible
   }
 };
 
